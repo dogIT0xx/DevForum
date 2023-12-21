@@ -1,23 +1,18 @@
-using Blog.Models;
+﻿using Blog.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace Blog.Controllers
 {
-    public class HomeController : Controller
+    public class PageController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
+        [HttpGet("home")]
+        public IActionResult Home()
         {
             return View();
         }
 
+        [HttpGet("privacy")]
         public IActionResult Privacy()
         {
             return View();
