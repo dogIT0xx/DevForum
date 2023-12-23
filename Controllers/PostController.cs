@@ -12,9 +12,9 @@ namespace Blog.Controllers
 {
     public class PostController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly BlogDbContext _context;
 
-        public PostController(ApplicationDbContext context)
+        public PostController(BlogDbContext context)
         {
             _context = context;
         }
@@ -22,19 +22,8 @@ namespace Blog.Controllers
         // GET: Post
         public async Task<IActionResult> Index()
         {
-            var post = await _context.Posts
-                .Select(post => new
-                    {
-                        post.Id,
-                        post.Title,
-                        post.Description,
-                        post.CreateAt,
-                        post.UpdateAt,
-                        post.Author.UserName
-                    })
-                .AsNoTracking()
-                .ToListAsync();
-            return View(await _context.Posts.ToListAsync());
+            var blogDbContext = _context.Posts.Include(p => p.Author);
+            return View(await blogDbContext.ToListAsync());
         }
 
         // GET: Post/Details/5
@@ -46,6 +35,7 @@ namespace Blog.Controllers
             }
 
             var post = await _context.Posts
+                .Include(p => p.Author)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
@@ -58,6 +48,7 @@ namespace Blog.Controllers
         // GET: Post/Create
         public IActionResult Create()
         {
+            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
@@ -66,7 +57,7 @@ namespace Blog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Content")] Post post)
         {
             if (ModelState.IsValid)
             {
@@ -74,6 +65,7 @@ namespace Blog.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", post.AuthorId);
             return View(post);
         }
 
@@ -90,6 +82,7 @@ namespace Blog.Controllers
             {
                 return NotFound();
             }
+            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", post.AuthorId);
             return View(post);
         }
 
@@ -98,7 +91,7 @@ namespace Blog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,Content")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Content")] Post post)
         {
             if (id != post.Id)
             {
@@ -125,6 +118,7 @@ namespace Blog.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", post.AuthorId);
             return View(post);
         }
 
@@ -137,6 +131,7 @@ namespace Blog.Controllers
             }
 
             var post = await _context.Posts
+                .Include(p => p.Author)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
