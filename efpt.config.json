@@ -12,11 +12,15 @@
    "ProjectRootNamespace": "Blog",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 2,
-   "SelectedToBeGenerated": 2,
+   "SelectedToBeGenerated": 0,
    "T4TemplatePath": null,
    "Tables": [
       {
          "Name": "[dbo].[Categories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Classify]",
          "ObjectType": 0
       },
       {
@@ -25,6 +29,34 @@
       },
       {
          "Name": "[dbo].[Posts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RoleClaims]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Roles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserClaims]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserLogins]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Users]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserTokens]",
          "ObjectType": 0
       }
    ],

@@ -1,8 +1,12 @@
-﻿using Blog.Data;
-using Blog.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Blog.Data;
+using Blog.Models;
 
 namespace Blog.Controllers
 {
@@ -18,8 +22,19 @@ namespace Blog.Controllers
         // GET: Post
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Posts.Include(p => p.Category);
-            return View(await applicationDbContext.ToListAsync());
+            var post = await _context.Posts
+                .Select(post => new
+                    {
+                        post.Id,
+                        post.Title,
+                        post.Description,
+                        post.CreateAt,
+                        post.UpdateAt,
+                        post.Author.UserName
+                    })
+                .AsNoTracking()
+                .ToListAsync();
+            return View(await _context.Posts.ToListAsync());
         }
 
         // GET: Post/Details/5
@@ -31,7 +46,6 @@ namespace Blog.Controllers
             }
 
             var post = await _context.Posts
-                .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
@@ -44,7 +58,6 @@ namespace Blog.Controllers
         // GET: Post/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
             return View();
         }
 
@@ -53,7 +66,7 @@ namespace Blog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,CategoryId,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,Content")] Post post)
         {
             if (ModelState.IsValid)
             {
@@ -61,7 +74,6 @@ namespace Blog.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
             return View(post);
         }
 
@@ -78,7 +90,6 @@ namespace Blog.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
             return View(post);
         }
 
@@ -87,7 +98,7 @@ namespace Blog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,CategoryId,Content")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Description,Content")] Post post)
         {
             if (id != post.Id)
             {
@@ -114,7 +125,6 @@ namespace Blog.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
             return View(post);
         }
 
@@ -127,7 +137,6 @@ namespace Blog.Controllers
             }
 
             var post = await _context.Posts
-                .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {

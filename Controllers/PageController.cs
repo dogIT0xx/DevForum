@@ -6,13 +6,13 @@ namespace Blog.Controllers
 {
     public class PageController : Controller
     {
-        [HttpGet("home")]
+        [HttpGet()]
         public IActionResult Home()
         {
             return View();
         }
 
-        [HttpGet("privacy")]
+        [HttpGet()]
         public IActionResult Privacy()
         {
             return View();
