@@ -1,8 +1,14 @@
 using Blog.Data;
+using Blog.Services.Firebase.Storage;
 using Blog.Services.MailService;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Drawing;
+using System.Text;
 
 namespace Blog
 {
@@ -11,6 +17,9 @@ namespace Blog
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Cấu hình biến môi trường firebase để dùng cho authen thư viện firebase.cloud
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"firebase-config.json");
 
             // Add services to the container.
             var connectionString = builder.Configuration
@@ -47,8 +56,8 @@ namespace Blog
 
             // Email config
             builder.Services.AddOptions();  // Kích hoạt Options
-            var mailSettings = builder.Configuration.GetSection("MailSettings");  // đọc config
-            builder.Services.Configure<MailSettings>(mailSettings); // đăng ký để Inject
+            var mailSetting = builder.Configuration.GetSection("MailSetting");  // đọc config
+            builder.Services.Configure<MailSetting>(mailSetting); // đăng ký để Inject
             builder.Services.AddTransient<ISendMailService, SendMailService>();
 
 
@@ -81,7 +90,7 @@ namespace Blog
                 name: "default",
                 pattern: "{controller=Page}/{action=Home}/{id?}");
 
-            //test send email
+            #region Test send email
             //app.UseRouting()
             //   .UseEndpoints(endpoints =>
             //   {
@@ -101,9 +110,36 @@ namespace Blog
             //           await context.Response.WriteAsync("send mail");
             //       });
             //   });
+            #endregion
+
             // Tự nó map area mặc định đcm nó
             // app.MapRazorPages();
+
+            #region Test upload file storage firebase
+            //// thêm 2 file1.jpq, file2.jpq thì mới hoạt động được
+            //var client = StorageClient.Create();
+
+            //// Create a bucket with a globally unique name
+            //var bucket = "blogmvc-b2c63.appspot.com";
+
+            //// Upload text file
+            //var content = Encoding.UTF8.GetBytes("hello, world");
+            //var obj1 = client.UploadObject(bucket, "file1.txt", "text/plain", new MemoryStream(content));
+            //// Upload image - Xác định content type "image/jpeg" rất quan trọng để nó hiển thị trên 
+            //Stream stream1 = new FileStream("file1.jpg", FileMode.Open);
+            //var obj2 = client.UploadObject(bucket, "file1.jpg", "image/jpeg", stream1);
+
+            //var storage = new StorageImage(bucket, client);
+            //var s = storage.UploadImage("file2.jpg", "file2.jpg").ToString();
+
+            //// Download file
+            //using (var stream = File.OpenWrite("file1.txt"))
+            //{
+            //    client.DownloadObject(bucket, "file1.txt", stream);
+            //}
+            #endregion
+
             app.Run();
-        }
+        }  
     }
 }

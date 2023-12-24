@@ -1,6 +1,6 @@
 ﻿namespace Blog.Services.MailService
 {
-    public class MailSettings
+    public class MailSetting
     {
         public string? Mail { get; set; }
         public string? DisplayName { get; set; }

@@ -8,12 +8,12 @@ namespace Blog.Services.MailService
 {
     public class SendMailService : ISendMailService
     {
-        private readonly MailSettings _mailSettings;
+        private readonly MailSetting _mailSetting;
         private readonly ILogger<SendMailService> _logger;
 
-        public SendMailService(IOptions<MailSettings> mailSettings, ILogger<SendMailService> logger)
+        public SendMailService(IOptions<MailSetting> options, ILogger<SendMailService> logger)
         {
-            _mailSettings = mailSettings.Value;
+            _mailSetting = options.Value;
             _logger = logger;
             _logger.LogInformation("Create SendMailService");
         }
@@ -21,8 +21,8 @@ namespace Blog.Services.MailService
         public async Task SendEmailAsync(MailContent mailContent)
         {
             var email = new MimeMessage();
-            email.Sender = new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail);
-            email.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
+            email.Sender = new MailboxAddress(_mailSetting.DisplayName, _mailSetting.Mail);
+            email.From.Add(new MailboxAddress(_mailSetting.DisplayName, _mailSetting.Mail));
             email.To.Add(MailboxAddress.Parse(mailContent.To));
             email.Subject = mailContent.Subject;
 
@@ -34,8 +34,8 @@ namespace Blog.Services.MailService
             {
                 try
                 {
-                    smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-                    smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
+                    smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
+                    smtp.Authenticate(_mailSetting.Mail, _mailSetting.Password);
                     await smtp.SendAsync(email);
                 }
                 catch (Exception ex)
