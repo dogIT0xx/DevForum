@@ -1,20 +1,15 @@
 ﻿@model RegisterModel
-@{
-    ViewData["Title"] = "Register";
-}
-
-<h1>@ViewData["Title"]</h1>
 
 <div class="row">
     <div class="col-md-4">
         <form id="registerForm" method="post" asp-controller="Account" asp-action="Register">
-            <h2>Create a new account.</h2>
+            <h2>Tạo tài khoản mới</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="UserName" class="form-control" autocomplete="username" aria-required="true" />
                 @* asp-for="UserName" -> <label for="UserName">User Name(Display Atribute)</label> *@
-                <label asp-for="UserName"></label>
+                <label asp-for="UserName">Tên đăng nhập</label>
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
@@ -24,12 +19,12 @@
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Password" class="form-control" autocomplete="new-password" aria-required="true"/>
-                <label asp-for="Password"></label>
+                <label asp-for="Password">Mật khẩu</label>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="ConfirmPassword" class="form-control" aria-required="true" />
-                <label asp-for="ConfirmPassword"></label>
+                <label asp-for="ConfirmPassword">Xác nhận mật khẩu</label>
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Đăng kí</button>

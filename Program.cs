@@ -88,7 +88,7 @@ namespace Blog
             //Cấu hình map mặc định
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Page}/{action=Home}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
             #region Test send email
             //app.UseRouting()

@@ -1,29 +1,85 @@
-﻿@model IEnumerable<Blog.Models.Post>
+﻿@model PaginatedList<Blog.Models.Post>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Danh sách bài viết</h1>
 
-<ul class="list-group">
-
+@* Xử lí grid 4x4 *@
+<div class="row align-content-center justify-content-start">
     @foreach (var item in Model)
     {
-        <li class="list-group-item">
-            <div class="card">
-                <h5 class="card-header">@Html.DisplayFor(modelItem => item.Author.UserName)</h5>
-                <p class="card-text">
-                    <small class="text-body-secondary">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</small>
-                    <small class="text-body-secondary">Đăng lúc: @Html.DisplayFor(modelItem => item.UpdateAt)</small>
-                </p>
-
-                <div class="card-body">
-                    <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
-                    <p class="card-text"></p>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Chi tiết</a>
-                </div>
+        <div class="card col-4 mx-4 my-3" style="width: 20rem;">
+            <img src="https://2.bp.blogspot.com/-KdS1xPNH5jY/WE_e3tu_5BI/AAAAAAAADY4/uOPcf412JvsfWMvXMcDkI-u19OX2YHbrQCLcB/w600-h300-p-k-no-nu/tan-man-ve-j2team.png" class="card-img-top" alt="...">
+            <div class="card-body">
+                <a asp-action="Details" asp-route-id="@item.Id" class="card-title fs-5 text-black">@Html.DisplayFor(modelItem => item.Title)</a>
+                <hr />
+                <p class="card-text fs-6">Người đăng: @Html.DisplayFor(modelItem => item.Author.UserName)</p>
+                <p class="card-text fs-6">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</p>
+                <ul class="list-group list-group-flush list-group-horizontal-sm ">
+                    @foreach (var classify in item.PostClassifies)
+                    {
+                        <li class="list-group-item">
+                            <a class="btn btn-secondary btn-sm" href="#" role="button">@Html.DisplayFor(tag => classify.Tag.Name)</a>
+                        </li>
+                    }
+                </ul>
             </div>
-        </li>
+        </div>
     }
+</div>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+
+<ul class="pagination">
+    <li class="page-item">
+        <a class="page-link"
+           asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex - 1)"
+           asp-route-searchString="@ViewData["CurrentFilter"]"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+    </li>
+    @for (int i = 1; i <= Model.TotalPages; i++)
+    {
+        @if (Model.PageIndex == i)
+        {
+            <li class="page-item active" aria-current="page">
+                <a class="page-link active"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(i)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="btn btn-default @nextDisabled">
+                    @(i)
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-pageNumber="@(i)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="btn btn-default @nextDisabled">
+                    @(i)
+                </a>
+            </li>
+        }
+    }
+    <li class="page-item">
+        <a class="page-link"
+           asp-action="Index"
+           asp-route-pageNumber="@(Model.PageIndex + 1)"
+           asp-route-searchString="@ViewData["CurrentFilter"]"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
+    </li>
 </ul>

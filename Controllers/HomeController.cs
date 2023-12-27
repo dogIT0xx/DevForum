@@ -4,15 +4,15 @@ using System.Diagnostics;
 
 namespace Blog.Controllers
 {
-    public class PageController : Controller
+    public class HomeController : Controller
     {
-        [HttpGet()]
-        public IActionResult Home()
+        [HttpGet]
+        public  IActionResult Index()
         {
             return View();
         }
 
-        [HttpGet()]
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();

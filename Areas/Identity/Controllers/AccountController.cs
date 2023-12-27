@@ -83,7 +83,7 @@ namespace Blog.Areas.Identity.Controllers
                     }
                 }
             }
-            return View(registerModel);
+            return RedirectToAction(nameof(Login));
         }
 
         [HttpGet]
@@ -127,7 +127,7 @@ namespace Blog.Areas.Identity.Controllers
                     return LocalRedirect("/");
                 }
             }
-            
+            ViewBag.Error = true;
             return View(loginModel);
         }
 

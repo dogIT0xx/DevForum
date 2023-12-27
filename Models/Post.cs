@@ -33,7 +33,7 @@ public partial class Post
     [Column(TypeName = "nvarchar")]
     public string Title { get; set; }
 
-    [Column(TypeName = "nvarchar")]
+    [Column(TypeName = "nvarchar(max)")]
     public string Content { get; set; }
 
 
@@ -42,4 +42,16 @@ public partial class Post
     public ICollection<ImageLink> ImageLinks { get; set; }
     
     public ICollection<PostClassify> PostClassifies { get; set; }
+
+
+    public Post()
+    {
+
+    }    
+
+    public Post(string title, string content)
+    {
+        Title = title;
+        Content = content;
+    }
 }

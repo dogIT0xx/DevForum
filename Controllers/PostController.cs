@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Blog.Data;
 using Blog.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using Blog.Utils;
 
 namespace Blog.Controllers
 {
@@ -20,13 +23,35 @@ namespace Blog.Controllers
         }
 
         // GET: Post
-        public async Task<IActionResult> Index()
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string? searchString, int? pageNumber)
         {
-            var blogDbContext = _context.Posts.Include(p => p.Author);
-            return View(await blogDbContext.ToListAsync());
+            var posts = _context.Posts
+               .Include(p => p.Author)
+               .Include(p => p.PostClassifies)
+                   .ThenInclude(ps => ps.Tag)
+               .AsNoTracking();
+        
+            //  Xử lí search
+            if (!searchString.IsNullOrEmpty())
+            {
+                // Tìm kiếm các bài viết có tilte, và Author chứa searchString
+                posts = posts
+                    .Where(p => 
+                        p.Title.Contains(searchString!) || 
+                        p.Author.UserName!.Contains(searchString!));
+            }
+
+            // Xử lí phân trang
+            var pageSize = 12;
+            var paginatedPost = await PaginatedList<Post>.CreateSync(posts, pageNumber ?? 1, pageSize);
+
+            ViewData["CurrentFilter"] = searchString; // Giữ current fillter của  search string trước đó
+            return View(paginatedPost);
         }
 
         // GET: Post/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,7 +61,11 @@ namespace Blog.Controllers
 
             var post = await _context.Posts
                 .Include(p => p.Author)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(p => p.PostClassifies)
+                    .ThenInclude(ps => ps.Tag)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (post == null)
             {
                 return NotFound();
@@ -46,27 +75,28 @@ namespace Blog.Controllers
         }
 
         // GET: Post/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
-        // POST: Post/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("AuthorId, Title, Content")] Post post)
         {
             if (ModelState.IsValid)
             {
+                post.Slug = "slug";
+                post.CreateAt = DateTime.Now;
+                post.UpdateAt = DateTime.Now;
                 _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", post.AuthorId);
-            return View(post);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Post/Edit/5
