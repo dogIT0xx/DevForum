@@ -1,37 +1,31 @@
 ﻿@model Blog.Models.Post
 
-@{
-    ViewData["Title"] = "Create";
-}
-
-<h1>Create</h1>
-
-<h4>Post</h4>
+<h1>Tạo bài viết</h1>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-10">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-           <div class="form-group">
-                <label asp-for="AuthorId" class="control-label"></label>
-                <select asp-for="AuthorId" class ="form-control" asp-items="ViewBag.AuthorId"></select>
-            </div>
+            <input asp-for="AuthorId" class="form-control" value="@ViewData["UserId"]" hidden />
             @*
             <div class="form-group">
-                <label asp-for="CreateAt" class="control-label"></label>
-                <input asp-for="CreateAt" class="form-control" />
-                <span asp-validation-for="CreateAt" class="text-danger"></span>
+            <label asp-for="CreateAt" class="control-label"></label>
+            <input asp-for="CreateAt" class="form-control" />
+            <span asp-validation-for="CreateAt" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UpdateAt" class="control-label"></label>
-                <input asp-for="UpdateAt" class="form-control" />
-                <span asp-validation-for="UpdateAt" class="text-danger"></span>
+            <label asp-for="UpdateAt" class="control-label"></label>
+            <input asp-for="UpdateAt" class="form-control" />
+            <span asp-validation-for="UpdateAt" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Slug" class="control-label"></label>
-                <input asp-for="Slug" class="form-control" />
-                <span asp-validation-for="Slug" class="text-danger"></span>
+            <label asp-for="Slug" class="control-label"></label>
+            <input asp-for="Slug" class="form-control" />
+            <span asp-validation-for="Slug" class="text-danger"></span>
             </div> *@
+            <div class="form-group">
+                <input name="imageFile" class="form-control" type="file"/>
+            </div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
@@ -39,11 +33,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" />
+                <textarea asp-for="Content" class="form-control"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="form-group mt-2">
+                <button type="submit" value="Create" class="btn btn-primary">Đăng</button>
             </div>
         </form>
     </div>
@@ -54,5 +48,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

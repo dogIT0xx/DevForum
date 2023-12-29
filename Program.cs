@@ -2,8 +2,10 @@ using Blog.Data;
 using Blog.Services.Firebase.Storage;
 using Blog.Services.MailService;
 using Google.Cloud.Storage.V1;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -42,24 +44,36 @@ namespace Blog
                     options.User.RequireUniqueEmail = true;
 
                     // Password
-                    options.Password.RequireDigit = true;
-                    options.Password.RequireLowercase = true;
-                    options.Password.RequireNonAlphanumeric = true;
-                    options.Password.RequireUppercase = true;
-                    options.Password.RequiredLength = 6;
-                    options.Password.RequiredUniqueChars = 1;
+                    //options.Password.RequireDigit = true;
+                    //options.Password.RequireLowercase = true;
+                    //options.Password.RequireNonAlphanumeric = true;
+                    //options.Password.RequireUppercase = true;
+                    //options.Password.RequiredLength = 6;
+                    //options.Password.RequiredUniqueChars = 1;
 
                     // SignIn
                     options.SignIn.RequireConfirmedEmail = true;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
                 });
 
-            // Email config
+            // Authen configs
+            //builder.Services
+            //    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //    .AddCookie(options =>
+            //    {
+            //        // Cấu hình đường dẫn khi chưa truy cập chức năng mà chưa Authen
+            //        options.LoginPath = "/Identity/Account/Register";
+            //    });
+
+            // Email configs
             builder.Services.AddOptions();  // Kích hoạt Options
             var mailSetting = builder.Configuration.GetSection("MailSetting");  // đọc config
             builder.Services.Configure<MailSetting>(mailSetting); // đăng ký để Inject
             builder.Services.AddTransient<ISendMailService, SendMailService>();
 
+
+            builder.Services.AddTransient<StorageClient>(sc => StorageClient.Create());
+            builder.Services.AddTransient<StorageFile>();
 
 
             var app = builder.Build();
@@ -88,7 +102,7 @@ namespace Blog
             //Cấu hình map mặc định
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Post}/{action=Index}/{id?}");
 
             #region Test send email
             //app.UseRouting()
@@ -140,6 +154,6 @@ namespace Blog
             #endregion
 
             app.Run();
-        }  
+        }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Migrations
 {
     [DbContext(typeof(BlogDbContext))]
-    [Migration("20231223154502_InitDb")]
-    partial class InitDb
+    [Migration("20231229053010_FixLength")]
+    partial class FixLength
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,21 +27,19 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.Models.ImageLink", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Link")
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar");
 
-                    b.Property<int?>("PostId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -52,11 +50,9 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.Models.Post", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AuthorId")
                         .IsRequired()
@@ -64,7 +60,7 @@ namespace Blog.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime");
@@ -89,8 +85,8 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.Models.PostClassify", b =>
                 {
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("TagId")
                         .HasColumnType("int");
@@ -111,7 +107,7 @@ namespace Blog.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -337,7 +333,9 @@ namespace Blog.Migrations
                 {
                     b.HasOne("Blog.Models.Post", "Post")
                         .WithMany("ImageLinks")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Post");
                 });

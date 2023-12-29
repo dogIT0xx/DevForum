@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Blog.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class ReCreateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -96,14 +96,13 @@ namespace Blog.Migrations
                 name: "Post",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AuthorId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     UpdateAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     Slug = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     Title = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Content = table.Column<string>(type: "nvarchar", nullable: true)
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -205,10 +204,9 @@ namespace Blog.Migrations
                 name: "ImageLink",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    PostId = table.Column<int>(type: "int", nullable: true),
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Link = table.Column<string>(type: "varchar", nullable: true)
                 },
                 constraints: table =>
@@ -218,14 +216,15 @@ namespace Blog.Migrations
                         name: "FK_ImageLink_Post_PostId",
                         column: x => x.PostId,
                         principalTable: "Post",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PostClassify",
                 columns: table => new
                 {
-                    PostId = table.Column<int>(type: "int", nullable: false),
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TagId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

@@ -10,16 +10,25 @@ using Blog.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Blog.Utils;
+using Microsoft.AspNetCore.Identity;
+using Blog.Services.Firebase.Storage;
+using Google.Cloud.Storage.V1;
+using System.Text;
+using Google.Apis.Storage.v1.Data;
 
 namespace Blog.Controllers
 {
     public class PostController : Controller
     {
         private readonly BlogDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly StorageFile _storageFile;
 
-        public PostController(BlogDbContext context)
+        public PostController(BlogDbContext context, UserManager<IdentityUser> userManager, StorageFile storageFile)
         {
             _context = context;
+            _userManager = userManager;
+            _storageFile = storageFile;
         }
 
         // GET: Post
@@ -30,15 +39,16 @@ namespace Blog.Controllers
                .Include(p => p.Author)
                .Include(p => p.PostClassifies)
                    .ThenInclude(ps => ps.Tag)
+               .Include(p => p.ImageLinks)
                .AsNoTracking();
-        
+
             //  Xử lí search
             if (!searchString.IsNullOrEmpty())
             {
                 // Tìm kiếm các bài viết có tilte, và Author chứa searchString
                 posts = posts
-                    .Where(p => 
-                        p.Title.Contains(searchString!) || 
+                    .Where(p =>
+                        p.Title.Contains(searchString!) ||
                         p.Author.UserName!.Contains(searchString!));
             }
 
@@ -52,7 +62,7 @@ namespace Blog.Controllers
 
         // GET: Post/Details/5
         [AllowAnonymous]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(Guid id)
         {
             if (id == null)
             {
@@ -78,29 +88,54 @@ namespace Blog.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id");
+            var userId = _userManager.GetUserId(User);
+            ViewData["UserId"] = userId;
             return View();
         }
 
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AuthorId, Title, Content")] Post post)
+        public async Task<IActionResult> Create([Bind("AuthorId, Title, Content")] Post post, IFormFile imageFile)
+        // chú ý imageFile trùng tên với name của input
         {
             if (ModelState.IsValid)
             {
-                post.Slug = "slug";
+                var postId = new Guid(); // Sử dụng để tạo post và Fk cho table Images
+                // Thêm các giá trị cho post
+                post.Id = postId;
+                post.Slug = imageFile.FileName.ToLower();
                 post.CreateAt = DateTime.Now;
                 post.UpdateAt = DateTime.Now;
-                _context.Add(post);
+                await _context.AddAsync(post);
+
+                // Xử lí ảnh
+                if (imageFile != null)
+                {
+                    // Upload ảnh lên firebase
+                    var stream = imageFile.OpenReadStream();
+                    var guid = Guid.NewGuid();
+                    var fileName = $"{imageFile.FileName}_{guid}";
+                    var uri = await _storageFile.UploadImage(fileName, stream);
+
+                    // Tạo record ImageLink
+                    var imageLink = new ImageLink
+                    {
+                        Id = guid,
+                        Name = imageFile.FileName,
+                        PostId = post.Id,
+                        Link = uri
+                    };
+                    await _context.AddAsync(imageLink);
+                }
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
+
             return RedirectToAction(nameof(Index));
         }
 
         // GET: Post/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -121,7 +156,7 @@ namespace Blog.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Content")] Post post)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CreateAt,UpdateAt,Slug,Title,Content")] Post post)
         {
             if (id != post.Id)
             {
@@ -153,7 +188,7 @@ namespace Blog.Controllers
         }
 
         // GET: Post/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -186,7 +221,7 @@ namespace Blog.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PostExists(int id)
+        private bool PostExists(Guid id)
         {
             return _context.Posts.Any(e => e.Id == id);
         }

@@ -25,7 +25,7 @@ public partial class Tag
     [ForeignKey(nameof(ParentTag))]
     public int? ParentId { get; set; }
 
-    [Column(TypeName = "nvarchar")]
+    [Column(TypeName = "nvarchar(max)")]
     public string Description { get; set; }
 
 

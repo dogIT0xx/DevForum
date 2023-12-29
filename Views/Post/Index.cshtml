@@ -4,14 +4,20 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Danh sách bài viết</h1>
+<div class="d-flex justify-content-around">
+    <h3>Danh sách bài viết</h3>
+    <a class="btn btn-primary" asp-controller="Post" asp-action="Create">
+        Tạo bài viết mới
+    </a>
+</div>
+
 
 @* Xử lí grid 4x4 *@
 <div class="row align-content-center justify-content-start">
     @foreach (var item in Model)
     {
-        <div class="card col-4 mx-4 my-3" style="width: 20rem;">
-            <img src="https://2.bp.blogspot.com/-KdS1xPNH5jY/WE_e3tu_5BI/AAAAAAAADY4/uOPcf412JvsfWMvXMcDkI-u19OX2YHbrQCLcB/w600-h300-p-k-no-nu/tan-man-ve-j2team.png" class="card-img-top" alt="...">
+        <div class="card col-md-3 mx-4 my-3" style="width: 20rem;">
+            <img src="@item.ImageLinks[0].Link" class="card-img-top" alt="...">
             <div class="card-body">
                 <a asp-action="Details" asp-route-id="@item.Id" class="card-title fs-5 text-black">@Html.DisplayFor(modelItem => item.Title)</a>
                 <hr />
@@ -30,56 +36,56 @@
     }
 </div>
 
+
 @{
     var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
     var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 }
+<h6>@prevDisabled</h6>
+<h6>@nextDisabled</h6>
 
-
-<ul class="pagination">
-    <li class="page-item">
-        <a class="page-link"
-           asp-action="Index"
-           asp-route-pageNumber="@(Model.PageIndex - 1)"
-           asp-route-searchString="@ViewData["CurrentFilter"]"
-           class="btn btn-default @prevDisabled">
-            Previous
-        </a>
-    </li>
-    @for (int i = 1; i <= Model.TotalPages; i++)
-    {
-        @if (Model.PageIndex == i)
+<div class="d-flex justify-content-center">
+    <ul class="pagination">
+        <li class="page-item">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-searchString="@ViewData["CurrentFilter"]"
+               class="page-link btn btn-default @prevDisabled">
+                Previous
+            </a>
+        </li>
+        @for (int i = 1; i <= Model.TotalPages; i++)
         {
-            <li class="page-item active" aria-current="page">
-                <a class="page-link active"
-                   asp-action="Index"
-                   asp-route-pageNumber="@(i)"
-                   asp-route-searchString="@ViewData["CurrentFilter"]"
-                   class="btn btn-default @nextDisabled">
-                    @(i)
-                </a>
-            </li>
+            @if (Model.PageIndex == i)
+            {
+                <li class="page-item active" aria-current="page">
+                    <a class="page-link active"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(i)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        @(i)
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(i)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]">
+                        @(i)
+                    </a>
+                </li>
+            }
         }
-        else
-        {
-            <li class="page-item">
-                <a class="page-link"
-                   asp-action="Index"
-                   asp-route-pageNumber="@(i)"
-                   asp-route-searchString="@ViewData["CurrentFilter"]"
-                   class="btn btn-default @nextDisabled">
-                    @(i)
-                </a>
-            </li>
-        }
-    }
-    <li class="page-item">
-        <a class="page-link"
-           asp-action="Index"
-           asp-route-pageNumber="@(Model.PageIndex + 1)"
-           asp-route-searchString="@ViewData["CurrentFilter"]"
-           class="btn btn-default @nextDisabled">
-            Next
-        </a>
-    </li>
-</ul>
+        <li class="page-item">
+            <a class="page-link btn btn-default @nextDisabled"
+               asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-searchString="@ViewData["CurrentFilter"]">
+                Next
+            </a>
+        </li>
+    </ul>
+</div>

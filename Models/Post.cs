@@ -11,8 +11,7 @@ namespace Blog.Models;
 [Table(nameof(Post))]
 public partial class Post
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required]
     [StringLength(450)]
@@ -39,7 +38,7 @@ public partial class Post
 
     public IdentityUser Author { get; set; }
 
-    public ICollection<ImageLink> ImageLinks { get; set; }
+    public List<ImageLink> ImageLinks { get; set; }
     
     public ICollection<PostClassify> PostClassifies { get; set; }
 

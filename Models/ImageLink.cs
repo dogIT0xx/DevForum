@@ -11,16 +11,16 @@ namespace Blog.Models;
 [Table(nameof(ImageLink))]
 public class ImageLink
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(256)]
     [Column(TypeName = "nvarchar")]
     public string Name { get; set; }
 
     [ForeignKey(nameof(Post))]
-    public int? PostId { get; set; }
+    public Guid PostId { get; set; }
 
-    [Column(TypeName = "varchar")]
+    [Column(TypeName = "varchar(max)")]
     public string Link { get; set; }
 
     public Post Post { get; set; }

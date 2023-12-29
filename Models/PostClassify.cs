@@ -13,7 +13,7 @@ namespace Blog.Models;
 public class PostClassify
 {
     [ForeignKey(nameof(Post))]
-    public int PostId { get; set; }
+    public Guid PostId { get; set; }
 
 
     [ForeignKey(nameof(Tag))]

@@ -9,7 +9,7 @@ namespace Blog.Controllers
         [HttpGet]
         public  IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "Post");
         }
 
         [HttpGet]
