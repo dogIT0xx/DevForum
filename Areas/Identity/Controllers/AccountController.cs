@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Org.BouncyCastle.Asn1.X509;
+using System.Data;
 using System.Text;
 using System.Text.Encodings.Web;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -101,7 +102,7 @@ namespace Blog.Areas.Identity.Controllers
                 }
             }
             ViewData["Message"] = "Xác thực email thất bại";
-            return View();
+            return View("Notify");
         }
 
         [HttpGet]
@@ -137,6 +138,113 @@ namespace Blog.Areas.Identity.Controllers
         {
             await _signInManager.SignOutAsync();
             return LocalRedirect("/");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AccountInfo()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var accounInfoModel = new AccountInfoModel()
+                {
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                };
+                return View(accounInfoModel);
+            }
+            ViewData["Message"] = "Lỗi";
+            return View("Notify");
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(AccountInfoModel accountInfoModel)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            user.UserName = accountInfoModel.UserName;
+            user.Email = accountInfoModel.Email;
+            user.PhoneNumber = accountInfoModel.PhoneNumber;
+            await _userManager.UpdateAsync(user);
+            return View(nameof(AccountInfo));
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel forgotPasswordModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(forgotPasswordModel.Email);
+                if (user != null)
+                {
+                    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                    var callbackUrl = Url.ActionLink(
+                        action: nameof(ResetPassword),
+                        values: new { area = "Identity", code },
+                        protocol: Request.Scheme);
+
+                    var mailContent = new MailContent(
+                                forgotPasswordModel.Email,
+                                "Quên mật khẩu",
+                                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
+                    await _sendMailService.SendEmailAsync(mailContent);
+                }
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string? code)
+        {
+            if (code != null)
+            {
+                BadRequest("Không có code");
+            }
+
+            ViewData["Code"] = code;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel resetPasswordModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(resetPasswordModel.Email);
+                if (user != null)
+                {
+                    await _userManager.ResetPasswordAsync(user, resetPasswordModel.Code, resetPasswordModel.Password);
+                    ViewData["Message"] = "Đổi mật khẩu thành công";
+                    return View("Notify");
+                }
+            }
+            ViewData["Message"] = "Đổi mật khẩu thất bại";
+            return View("Notify");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            var userId = _userManager.GetUserId(User);
+            var changePasswordModel = new ChangePasswordModel
+            {
+                UserId = userId
+            };
+
+            return View();
         }
     }
 }

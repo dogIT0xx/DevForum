@@ -1,0 +1,31 @@
+﻿@model AccountInfoModel
+
+<h1>Thông tin tài khoản</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" asp-action="Update">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="form mb-3">
+                <label asp-for="UserName" class="form-label">Tên tài khoản</label>
+                <input asp-for="UserName" class="form-control" aria-required="true" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="form mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" autocomplete="Email" aria-required="true" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form mb-3">
+                <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                <input asp-for="PhoneNumber" class="form-control" autocomplete="phonenumber" />
+                <span asp-validation-for="PhoneNumber" class="text-danger "></span>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Cập nhật</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

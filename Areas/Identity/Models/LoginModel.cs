@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Areas.Identity.Models
@@ -6,6 +7,7 @@ namespace Blog.Areas.Identity.Models
     public class LoginModel
     {
         [Required]
+        [HiddenInput]
         public string UserName { get; set; }
 
         [Required]

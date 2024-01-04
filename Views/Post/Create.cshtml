@@ -33,9 +33,14 @@
             </div>
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
-                <textarea asp-for="Content" class="form-control"></textarea>
+                <textarea asp-for="Content" class="form-control" id="textAreaCreatePost"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
+            <script>
+                tinymce.init({
+                    selector: '#textAreaCreatePost'
+                });
+            </script>
             <div class="form-group mt-2">
                 <button type="submit" value="Create" class="btn btn-primary">Đăng</button>
             </div>

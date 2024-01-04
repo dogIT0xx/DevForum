@@ -73,6 +73,7 @@ namespace Blog.Controllers
                 .Include(p => p.Author)
                 .Include(p => p.PostClassifies)
                     .ThenInclude(ps => ps.Tag)
+                .Include(p => p.ImageLinks)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
