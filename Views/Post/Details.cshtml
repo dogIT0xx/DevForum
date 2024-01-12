@@ -1,4 +1,4 @@
-﻿@model Blog.Models.Post
+﻿@model Post
 
 <div class="container mt-5">
     <div class="row">
@@ -20,11 +20,11 @@
                 </header>
                 <!-- Preview image figure-->
                 <figure class="mb-4">
-                    <img class="img-fluid rounded" src="@Model.ImageLinks[0].Link" alt="..." />
+                    <img class="img-fluid rounded" src="@Model.PostImages[0].Path" alt="..." />
                 </figure>
                 <!-- Post content-->
                 <section class="mb-5">
-                    @Html.Raw(Model.Content))
+                    @Html.Raw(Model.Content)
                 </section>
             </article>
             <!-- Comments section-->

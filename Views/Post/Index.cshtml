@@ -1,36 +1,46 @@
-﻿@model PaginatedList<Blog.Models.Post>
+﻿@model PaginatedList<Post>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Posts";
 }
 
-<div class="d-flex justify-content-around">
+<div class="d-flex justify-content-between">
     <h3>Danh sách bài viết</h3>
     <a class="btn btn-primary" asp-controller="Post" asp-action="Create">
         Tạo bài viết mới
     </a>
 </div>
 
-
-@* Xử lí grid 4x4 *@
+@* Xử lí grid 1x12 *@
 <div class="row align-content-center justify-content-start">
     @foreach (var item in Model)
     {
-        <div class="card col-md-3 mx-4 my-3" style="width: 20rem;">
-            <img src="@item.ImageLinks[0].Link" class="card-img-top" alt="..." style="height:220px; object-fit:contain">
-            <div class="card-body">
-                <a asp-action="Details" asp-route-id="@item.Id" class="card-title fs-5 text-black">@Html.DisplayFor(modelItem => item.Title)</a>
-                <hr />
-                <p class="card-text fs-6">Người đăng: @Html.DisplayFor(modelItem => item.Author.UserName)</p>
-                <p class="card-text fs-6">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</p>
-                <ul class="list-group list-group-flush list-group-horizontal-sm ">
-                    @foreach (var classify in item.PostClassifies)
-                    {
-                        <li class="list-group-item">
-                            <a class="btn btn-secondary btn-sm" href="#" role="button">@Html.DisplayFor(tag => classify.Tag.Name)</a>
-                        </li>
-                    }
-                </ul>
+        var path = "https://firebasestorage.googleapis.com/v0/b/blogmvc-b2c63.appspot.com/o" + @item.PostImages[0].Path + "?alt=media";
+
+        <div class="card mb-3 col-md-11" style="width: 735px; height:200px">
+            <div class="row g-0">
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Post" asp-action="Details" asp-route-id="@item.Id">
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </a>
+                        </h5>
+                        <p class="card-text">Người đăng: @Html.DisplayFor(modelItem => item.Author.UserName)</p>
+                        <p class="card-text"><small class="text-body-secondary">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</small></p>
+                        <ul class="list-group list-group-flush list-group-horizontal-sm ">
+                            @foreach (var classify in item.PostClassifies)
+                            {
+                                <li class="list-group-item">
+                                    <a class="btn btn-secondary btn-sm" href="#" role="button">@Html.DisplayFor(tag => classify.Tag.Name)</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4 my-auto">
+                    <img src="@path" class="img-fluid rounded" alt="...">
+                </div>
             </div>
         </div>
     }

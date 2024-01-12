@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Blog.Utils;
 using Microsoft.AspNetCore.Identity;
-using Blog.Services.Firebase.Storage;
 using Google.Cloud.Storage.V1;
 using System.Text;
 using Google.Apis.Storage.v1.Data;
+using Blog.Entities;
+using Blog.Services.Firebase;
 
 namespace Blog.Controllers
 {
@@ -39,7 +40,7 @@ namespace Blog.Controllers
                .Include(p => p.Author)
                .Include(p => p.PostClassifies)
                    .ThenInclude(ps => ps.Tag)
-               .Include(p => p.ImageLinks)
+               .Include(pi => pi.PostImages)
                .AsNoTracking();
 
             //  Xử lí search
@@ -64,16 +65,11 @@ namespace Blog.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Details(Guid id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var post = await _context.Posts
                 .Include(p => p.Author)
                 .Include(p => p.PostClassifies)
                     .ThenInclude(ps => ps.Tag)
-                .Include(p => p.ImageLinks)
+                .Include(p => p.PostImages)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -105,7 +101,7 @@ namespace Blog.Controllers
                 var postId = new Guid(); // Sử dụng để tạo post và Fk cho table Images
                 // Thêm các giá trị cho post
                 post.Id = postId;
-                post.Slug = imageFile.FileName.ToLower();
+                post.Slug = post.Title.ToLower().Replace(" ", "-");
                 post.CreateAt = DateTime.Now;
                 post.UpdateAt = DateTime.Now;
                 await _context.AddAsync(post);
@@ -116,18 +112,20 @@ namespace Blog.Controllers
                     // Upload ảnh lên firebase
                     var stream = imageFile.OpenReadStream();
                     var guid = Guid.NewGuid();
-                    var fileName = $"{imageFile.FileName}_{guid}";
-                    var uri = await _storageFile.UploadImage(fileName, stream);
 
-                    // Tạo record ImageLink
-                    var imageLink = new ImageLink
+                    // Xử lí lưu tên ảnh
+                    var extension = Path.GetExtension(imageFile.FileName);
+                    var fileName = $"{Path.GetFileNameWithoutExtension(imageFile.FileName)}_{guid}{extension}";
+                    await _storageFile.UploadImageAsync(fileName, stream);
+
+                    // Tạo record PostImage
+                    var postImage = new PostImage
                     {
                         Id = guid,
-                        Name = imageFile.FileName,
                         PostId = post.Id,
-                        Link = uri
+                        Path = $"/{fileName}",
                     };
-                    await _context.AddAsync(imageLink);
+                    await _context.AddAsync(postImage);
                 }
                 await _context.SaveChangesAsync();
             }

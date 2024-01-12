@@ -1,30 +1,17 @@
-﻿@model Blog.Models.Post
+﻿@model Post
 
+<script src="~/lib/tinymce/tinymce.min.js"></script>
 <h1>Tạo bài viết</h1>
 <hr />
+
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-12">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input asp-for="AuthorId" class="form-control" value="@ViewData["UserId"]" hidden />
-            @*
             <div class="form-group">
-            <label asp-for="CreateAt" class="control-label"></label>
-            <input asp-for="CreateAt" class="form-control" />
-            <span asp-validation-for="CreateAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="UpdateAt" class="control-label"></label>
-            <input asp-for="UpdateAt" class="form-control" />
-            <span asp-validation-for="UpdateAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-            <label asp-for="Slug" class="control-label"></label>
-            <input asp-for="Slug" class="form-control" />
-            <span asp-validation-for="Slug" class="text-danger"></span>
-            </div> *@
-            <div class="form-group">
-                <input name="imageFile" class="form-control" type="file"/>
+                <label class="control-label">Thumnail</label>
+                <input name="imageFile" class="form-control" type="file" />
             </div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
@@ -33,14 +20,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="Content" class="control-label"></label>
-                <textarea asp-for="Content" class="form-control" id="textAreaCreatePost"></textarea>
+                <textarea asp-for="Content" class="form-control" id="editor-container" style="height:300px"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-            <script>
-                tinymce.init({
-                    selector: '#textAreaCreatePost'
-                });
-            </script>
             <div class="form-group mt-2">
                 <button type="submit" value="Create" class="btn btn-primary">Đăng</button>
             </div>
@@ -57,3 +39,19 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+<script>
+    tinymce.init({
+        selector: '#editor-container',
+        plugins: 'link lists table image codesample pagebreak',
+        toolbar1: 'undo redo | styles | bold italic underline strikethrough | numlist bullist alignleft aligncenter alignright | link image codesample table pagebreak',
+        menubar: false,
+        branding: false,
+        statusbar:false,
+        a11y_advanced_options: true,
+        file_picker_callback: (callback, value, meta) => {
+            showOpenFilePicker()
+        },
+        file_picker_types: 'file image media'
+    });
+</script>

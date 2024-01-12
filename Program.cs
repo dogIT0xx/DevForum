@@ -1,12 +1,13 @@
 using Blog.Data;
-using Blog.Services.Firebase.Storage;
+using Blog.Services.Firebase;
 using Blog.Services.MailService;
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Drawing;
@@ -23,15 +24,16 @@ namespace Blog
             // Cấu hình biến môi trường firebase để dùng cho authen thư viện firebase.cloud
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"firebase-config.json");
 
-            // Add services to the container.
+            #region Config db context
             var connectionString = builder.Configuration
                 .GetConnectionString("DefaultConnection") ??
                 throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<BlogDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+            #endregion
 
-            // đăng kí dịch vụ Identity
+            #region Config Identity
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
                 options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlogDbContext>();
@@ -55,8 +57,9 @@ namespace Blog
                     options.SignIn.RequireConfirmedEmail = true;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
                 });
+            #endregion
 
-            // Authen configs
+            #region Authen configs
             //builder.Services
             //    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             //    .AddCookie(options =>
@@ -64,21 +67,29 @@ namespace Blog
             //        // Cấu hình đường dẫn khi chưa truy cập chức năng mà chưa Authen
             //        options.LoginPath = "/Identity/Account/Register";
             //    });
+            #endregion
 
-            // Email configs
+            #region Firebase storage file configs
+            // Get bucket in appsetting.json
+            var bucket = builder.Configuration.GetSection("Firebase").GetSection("StorageFile")["Bucket"];
+            builder.Services.Configure<StorageFileSetting>(options =>
+            {
+                options.Bucket = bucket!;
+                options.StorageClient = StorageClient.Create();
+            });
+            builder.Services.AddTransient<IStorageFile, StorageFile>();
+            #endregion
+
+            #region Email configs
             builder.Services.AddOptions();  // Kích hoạt Options
             var mailSetting = builder.Configuration.GetSection("MailSetting");  // đọc config
             builder.Services.Configure<MailSetting>(mailSetting); // đăng ký để Inject
             builder.Services.AddTransient<ISendMailService, SendMailService>();
-
-
-            builder.Services.AddTransient<StorageClient>(sc => StorageClient.Create());
-            builder.Services.AddTransient<StorageFile>();
-
+            #endregion
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            #region Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -95,39 +106,19 @@ namespace Blog
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
             //// cấu hình map area
-            app.MapControllerRoute(
-                name: "Identity",
-                pattern: "{area:exists}/{controller}/{action}/{id?}");
+            //app.MapControllerRoute(
+            //    name: "Identity",
+            //    pattern: "{area:exists}/{controller}/{action}/{id?}");
             //Cấu hình map mặc định
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Post}/{action=Index}/{id?}");
-
-            #region Test send email
-            //app.UseRouting()
-            //   .UseEndpoints(endpoints =>
-            //   {
-            //       endpoints.MapGet("/testmail", async context =>
-            //       {
-
-            //           // lấy dịch vụ sendmailservice
-            //           var sendMailService = context.RequestServices.GetService<ISendMailService>();
-            //           var content = new MailContent
-            //           {
-            //               To = "nguyenviethoang.2003.personal@gmail.com",
-            //               Subject = "kiểm tra thử",
-            //               Body = "<p><strong>xin chào việt hoàng</strong></p>"
-            //           };
-
-            //           await sendMailService.SendEmailAsync(content);
-            //           await context.Response.WriteAsync("send mail");
-            //       });
-            //   });
-            #endregion
-
+                pattern: "{controller=Home}/{action=Index}/{id?}");
             // Tự nó map area mặc định đcm nó
             // app.MapRazorPages();
+            app.Run();
+            #endregion
 
             #region Test upload file storage firebase
             //// thêm 2 file1.jpq, file2.jpq thì mới hoạt động được
@@ -153,7 +144,27 @@ namespace Blog
             //}
             #endregion
 
-            app.Run();
+            #region Test send email
+            //app.UseRouting()
+            //   .UseEndpoints(endpoints =>
+            //   {
+            //       endpoints.MapGet("/testmail", async context =>
+            //       {
+
+            //           // lấy dịch vụ sendmailservice
+            //           var sendMailService = context.RequestServices.GetService<ISendMailService>();
+            //           var content = new MailContent
+            //           {
+            //               To = "nguyenviethoang.2003.personal@gmail.com",
+            //               Subject = "kiểm tra thử",
+            //               Body = "<p><strong>xin chào việt hoàng</strong></p>"
+            //           };
+
+            //           await sendMailService.SendEmailAsync(content);
+            //           await context.Response.WriteAsync("send mail");
+            //       });
+            //   });
+            #endregion
         }
     }
 }

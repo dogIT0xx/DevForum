@@ -1,8 +1,7 @@
-﻿using Blog.Models;
+﻿using Blog.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Blog.Data
 {
@@ -12,7 +11,7 @@ namespace Blog.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<PostClassify> PostTags { get; set; }
-        public DbSet<ImageLink> ImageLinks { get; set; }
+        public DbSet<PostImage> PostImage { get; set; }
 
         public BlogDbContext(DbContextOptions<BlogDbContext> options) : base(options)
         {
