@@ -105,9 +105,11 @@ namespace Blog.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
-            return View();
+            var loginModel = new LoginModel();
+            loginModel.ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            return View(loginModel);
         }
 
         [HttpPost]
@@ -129,6 +131,14 @@ namespace Blog.Controllers
             }
             ViewBag.Error = true;
             return View(loginModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLogin(string provider, string redirectUrl)
+        {
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return new ChallengeResult(provider, properties);
         }
 
         [HttpPost]

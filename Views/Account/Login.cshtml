@@ -36,7 +36,27 @@
 </div>
 
 <a asp-action="ForgotPassword" class="btn-link  mt-3">Quên mật khẩu</a>
+<form id="external-account" asp-controller="Account" asp-action="ExternalLogin" asp-route-returnUrl="/returnUrl" method="post" class="form-horizontal">
+    <div>
+        <p>
+            @foreach (var provider in Model.ExternalLogins!)
+            {
+                <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+            }
+        </p>
+    </div>
+</form>
 
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+<script>
+    function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+    }
+</script>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

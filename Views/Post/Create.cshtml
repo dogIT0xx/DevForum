@@ -1,4 +1,4 @@
-﻿@model Post
+﻿@model CreatePostModel
 
 <script src="~/lib/tinymce/tinymce.min.js"></script>
 <h1>Tạo bài viết</h1>
@@ -8,10 +8,9 @@
     <div class="col-md-12">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input asp-for="AuthorId" class="form-control" value="@ViewData["UserId"]" hidden />
             <div class="form-group">
-                <label class="control-label">Thumnail</label>
-                <input name="imageFile" class="form-control" type="file" />
+                <label asp-for="Thumbnail" class="control-label"></label>
+                <input asp-for="Thumbnail" class="form-control" type="file" />
             </div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>

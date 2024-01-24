@@ -4,47 +4,80 @@
     ViewData["Title"] = "Posts";
 }
 
-<div class="d-flex justify-content-between">
-    <h3>Danh sách bài viết</h3>
-    <a class="btn btn-primary" asp-controller="Post" asp-action="Create">
-        Tạo bài viết mới
-    </a>
-</div>
+
 
 @* Xử lí grid 1x12 *@
-<div class="row align-content-center justify-content-start">
-    @foreach (var item in Model)
-    {
-        var path = "https://firebasestorage.googleapis.com/v0/b/blogmvc-b2c63.appspot.com/o" + @item.PostImages[0].Path + "?alt=media";
+<div class="row">
+    <div class="col-lg-9 row align-content-center justify-content-start">
+        <div class="col-lg-12 d-flex justify-content-between mb-3">
+            <h3>Danh sách bài viết</h3>
+            <a class="btn btn-primary" asp-controller="Post" asp-action="Create">
+                Tạo bài viết mới
+            </a>
+        </div>
+        @foreach (var item in Model)
+        {
+            var path = "https://firebasestorage.googleapis.com/v0/b/blogmvc-b2c63.appspot.com/o" + @item.ThumbnailPath + "?alt=media";
 
-        <div class="card mb-3 col-md-11" style="width: 735px; height:200px">
-            <div class="row g-0">
-                <div class="col-md-8">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a asp-controller="Post" asp-action="Details" asp-route-id="@item.Id">
-                                @Html.DisplayFor(modelItem => item.Title)
-                            </a>
-                        </h5>
-                        <p class="card-text">Người đăng: @Html.DisplayFor(modelItem => item.Author.UserName)</p>
-                        <p class="card-text"><small class="text-body-secondary">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</small></p>
-                        <ul class="list-group list-group-flush list-group-horizontal-sm ">
-                            @foreach (var classify in item.PostClassifies)
-                            {
-                                <li class="list-group-item">
-                                    <a class="btn btn-secondary btn-sm" href="#" role="button">@Html.DisplayFor(tag => classify.Tag.Name)</a>
-                                </li>
-                            }
+            <div class="card mb-3 col-md-12" style="width: 820px; height:200px">
+                <div class="row g-0">
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-controller="Post" asp-action="Details" asp-route-id="@item.Id">
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </a>
+                            </h5>
+                            <p class="card-text">Người đăng: @Html.DisplayFor(modelItem => item.Author.UserName)</p>
+                            <p class="card-text"><small class="text-body-secondary">Đăng lúc: @Html.DisplayFor(modelItem => item.CreateAt)</small></p>
+                            <ul class="list-group list-group-flush list-group-horizontal-sm ">
+                                @foreach (var classify in item.PostClassifies)
+                                {
+                                    <li class="list-group-item">
+                                        <a class="btn btn-secondary btn-sm" href="#" role="button">@Html.DisplayFor(tag => classify.Tag.Name)</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4 my-auto">
+                        <img src="@path" class="border rounded mx-auto" alt="..." style="height:166px; width:100%; object-fit:contain">
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-lg-3">
+        <!-- Categories widget-->
+        <div class="card mb-4">
+            <div class="card-header">Categories</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#!">Web Design</a></li>
+                            <li><a href="#!">HTML</a></li>
+                            <li><a href="#!">Freebies</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="#!">JavaScript</a></li>
+                            <li><a href="#!">CSS</a></li>
+                            <li><a href="#!">Tutorials</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-4 my-auto">
-                    <img src="@path" class="img-fluid rounded" alt="...">
-                </div>
             </div>
         </div>
-    }
+        <!-- Side widget-->
+        <div class="card mb-4">
+            <div class="card-header">Side Widget</div>
+            <div class="card-body">You can put anything you want inside of these side widgets. They are easy to use, and feature the Bootstrap 5 card component!</div>
+        </div>
+    </div>
 </div>
+
 
 @if (Model.Count() != 0)
 {

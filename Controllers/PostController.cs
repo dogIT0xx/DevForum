@@ -16,6 +16,8 @@ using System.Text;
 using Google.Apis.Storage.v1.Data;
 using Blog.Entities;
 using Blog.Services.Firebase;
+using Blog.Models.Post;
+using Microsoft.Extensions.Hosting;
 
 namespace Blog.Controllers
 {
@@ -23,9 +25,9 @@ namespace Blog.Controllers
     {
         private readonly BlogDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly StorageFile _storageFile;
+        private readonly IStorageFile _storageFile;
 
-        public PostController(BlogDbContext context, UserManager<IdentityUser> userManager, StorageFile storageFile)
+        public PostController(BlogDbContext context, UserManager<IdentityUser> userManager, IStorageFile storageFile)
         {
             _context = context;
             _userManager = userManager;
@@ -85,48 +87,55 @@ namespace Blog.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            var userId = _userManager.GetUserId(User);
-            ViewData["UserId"] = userId;
             return View();
         }
 
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AuthorId, Title, Content")] Post post, IFormFile imageFile)
+        public async Task<IActionResult> Create(CreatePostModel inputModel)
         // chú ý imageFile trùng tên với name của input
         {
             if (ModelState.IsValid)
             {
-                var postId = new Guid(); // Sử dụng để tạo post và Fk cho table Images
-                // Thêm các giá trị cho post
-                post.Id = postId;
-                post.Slug = post.Title.ToLower().Replace(" ", "-");
-                post.CreateAt = DateTime.Now;
-                post.UpdateAt = DateTime.Now;
-                await _context.AddAsync(post);
+                // Get info current user
+                var user = await _userManager.GetUserAsync(User);
+                var newPost = new Post()
+                {
+                    Id = Guid.NewGuid(),
+                    AuthorId = user!.Id,
+                    Title = inputModel.Title,
+                    Slug = inputModel.Title.ToLower().Replace(" ", "-"),
+                    Content = inputModel.Content,
+                    CreateAt = DateTime.Now,
+                    UpdateAt = DateTime.Now
+                };
 
                 // Xử lí ảnh
-                if (imageFile != null)
+                var thumbnailFile = inputModel.Thumbnail;
+                if (thumbnailFile != null)
                 {
                     // Upload ảnh lên firebase
-                    var stream = imageFile.OpenReadStream();
+                    var stream = thumbnailFile.OpenReadStream();
                     var guid = Guid.NewGuid();
 
                     // Xử lí lưu tên ảnh
-                    var extension = Path.GetExtension(imageFile.FileName);
-                    var fileName = $"{Path.GetFileNameWithoutExtension(imageFile.FileName)}_{guid}{extension}";
+                    var extension = Path.GetExtension(thumbnailFile.FileName);
+                    var fileName = $"{Path.GetFileNameWithoutExtension(thumbnailFile.FileName)}_{guid}{extension}";
                     await _storageFile.UploadImageAsync(fileName, stream);
 
-                    // Tạo record PostImage
-                    var postImage = new PostImage
-                    {
-                        Id = guid,
-                        PostId = post.Id,
-                        Path = $"/{fileName}",
-                    };
-                    await _context.AddAsync(postImage);
+                    //// Tạo record PostImage
+                    //var newPostImage = new PostImage
+                    //{
+                    //    Id = guid,
+                    //    PostId = newPost.Id,
+                    //    Path = $"/{fileName}",
+                    //};
+                    //await _context.AddAsync(newPostImage);
+
+                    newPost.ThumbnailPath = $"/{fileName}";
                 }
+                await _context.AddAsync(newPost);
                 await _context.SaveChangesAsync();
             }
 

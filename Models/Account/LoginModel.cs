@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using Blog;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,5 +17,7 @@ namespace Blog.Models.Account
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
     }
 }

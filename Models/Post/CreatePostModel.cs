@@ -1,10 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿#nullable disable
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Models.Post
 {
-    public class PostModel
+    public class CreatePostModel
     {
+        // Chú ý dùng FormFile sẽ k hoạt động
+        public IFormFile Thumbnail {  get; set; } 
+
         [Required]
         [StringLength(256)]
         [Column(TypeName = "nvarchar(255)")]
@@ -13,11 +17,5 @@ namespace Blog.Models.Post
         [Required]
         [Column(TypeName = "nvarchar(max)")]
         public string Content { get; set; }
-
-        public PostModel(string title, string content)
-        {
-            Title = title;
-            Content = content;
-        }
     }
 }
